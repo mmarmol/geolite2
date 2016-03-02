@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.gromit.geolite2;
+package io.gromit.geolite2.cache;
 
 import java.io.IOException;
 

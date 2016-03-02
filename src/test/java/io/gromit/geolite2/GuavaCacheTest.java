@@ -10,6 +10,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.maxmind.db.NodeCache.Loader;
 
+import io.gromit.geolite2.cache.GuavaCache;
+
 public class GuavaCacheTest {
 
 	private Loader loader = new Loader() {

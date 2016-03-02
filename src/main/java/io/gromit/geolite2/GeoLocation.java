@@ -16,7 +16,9 @@
 package io.gromit.geolite2;
 
 import java.io.IOException;
+import java.net.InetAddress;
 import java.net.URL;
+import java.net.UnknownHostException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Timer;
@@ -34,14 +36,17 @@ import com.maxmind.db.NoCache;
 import com.maxmind.db.NodeCache;
 import com.maxmind.db.Reader.FileMode;
 import com.maxmind.geoip2.DatabaseReader;
+import com.maxmind.geoip2.model.CityResponse;
+
+import io.gromit.geolite2.model.Location;
 
 /**
  * The Class ScheduledDatabaseReader.
  */
-public class ScheduledDatabaseReader {
+public class GeoLocation {
 
 	/** The logger. */
-	private static Logger logger = LoggerFactory.getLogger(ScheduledDatabaseReader.class);
+	private static Logger logger = LoggerFactory.getLogger(GeoLocation.class);
 
 	/** The scheduled executor service. */
 	private ScheduledExecutorService scheduledExecutorService;
@@ -67,7 +72,7 @@ public class ScheduledDatabaseReader {
 	/**
 	 * Instantiates a new scheduled database reader.
 	 */
-	public ScheduledDatabaseReader() {
+	public GeoLocation() {
 	}
 
 	/**
@@ -77,7 +82,7 @@ public class ScheduledDatabaseReader {
 	 *            the md5 checksum url
 	 * @return the scheduled database reader
 	 */
-	public ScheduledDatabaseReader md5ChecksumUrl(String md5ChecksumUrl) {
+	public GeoLocation md5ChecksumUrl(String md5ChecksumUrl) {
 		this.md5ChecksumUrl = md5ChecksumUrl;
 		return this;
 	}
@@ -89,7 +94,7 @@ public class ScheduledDatabaseReader {
 	 *            the database url
 	 * @return the scheduled database reader
 	 */
-	public ScheduledDatabaseReader databaseUrl(String databaseUrl) {
+	public GeoLocation databaseUrl(String databaseUrl) {
 		this.databaseUrl = databaseUrl;
 		return this;
 	}
@@ -100,7 +105,7 @@ public class ScheduledDatabaseReader {
 	 * @param val the val
 	 * @return the scheduled database reader
 	 */
-	public ScheduledDatabaseReader locales(List<String> val) {
+	public GeoLocation locales(List<String> val) {
 		this.locales = val;
 		return this;
 	}
@@ -111,18 +116,51 @@ public class ScheduledDatabaseReader {
 	 * @param cache the cache
 	 * @return the scheduled database reader
 	 */
-	public ScheduledDatabaseReader cache(NodeCache cache) {
+	public GeoLocation cache(NodeCache cache) {
 		this.cache = cache;
 		return this;
 	}
 
-	/**
-	 * Database reader.
-	 *
-	 * @return the database reader
-	 */
-	public DatabaseReader databaseReader(){
-		return databaseReader;
+
+	public Location location(String ip){
+		CityResponse cityResponse;
+		try {
+			cityResponse = this.databaseReader.city(InetAddress.getByName(ip));
+		} catch (UnknownHostException e) {
+			throw new IllegalArgumentException(ip+" is not valid",e);
+		} catch (Exception e) {
+			throw new RuntimeException(e.getMessage(),e);
+		}
+		if(cityResponse==null){
+			return null;
+		}
+		Location location = new Location();
+		if(cityResponse.getCity()!=null){
+			location.setCityName(cityResponse.getCity().getName());
+			location.setCityGeonameId(cityResponse.getCity().getGeoNameId());
+		}
+		if(cityResponse.getContinent()!=null){
+			location.setContinentCode(cityResponse.getContinent().getCode());
+			location.setContinentName(cityResponse.getContinent().getName());
+			location.setContinentGeonameId(cityResponse.getContinent().getGeoNameId());
+		}
+		if(cityResponse.getCountry()!=null){
+			location.setCountryIsoCode(cityResponse.getCountry().getIsoCode());
+			location.setCountryName(cityResponse.getCountry().getName());
+			location.setCountryGeonameId(cityResponse.getCountry().getGeoNameId());
+		}
+		if(cityResponse.getLocation()!=null){
+			location.setLatitude(cityResponse.getLocation().getLatitude());
+			location.setLongitude(cityResponse.getLocation().getLongitude());
+		}
+		if(cityResponse.getSubdivisions()!=null 
+				&& cityResponse.getSubdivisions().size()>0){
+			location.setSubdivisionIsoCode(cityResponse.getSubdivisions().get(0).getIsoCode());
+			location.setSubdivisionName(cityResponse.getSubdivisions().get(0).getName());
+			location.setSubdivisionGeonameId(cityResponse.getSubdivisions().get(0).getGeoNameId());
+		}
+		
+		return location;
 	}
 	
 	/**
@@ -131,7 +169,7 @@ public class ScheduledDatabaseReader {
 	 * @return the scheduled database reader
 	 * @throws IllegalStateException the illegal state exception
 	 */
-	public ScheduledDatabaseReader start() throws IllegalStateException{
+	public GeoLocation start() throws IllegalStateException{
 		if (scheduledExecutorService != null) {
 			throw new IllegalStateException("it is already started");
 		}
@@ -152,7 +190,7 @@ public class ScheduledDatabaseReader {
 	 * @return the scheduled database reader
 	 * @throws IllegalStateException the illegal state exception
 	 */
-	public ScheduledDatabaseReader stop() throws IllegalStateException{
+	public GeoLocation stop() throws IllegalStateException{
 		if (scheduledExecutorService == null) {
 			throw new IllegalStateException("it was never started");
 		}
