@@ -21,7 +21,7 @@ public class ScheduledDatabaseReaderTest {
 			fail();
 		}catch(IllegalStateException e){	
 		}
-		System.out.println(new ObjectMapper().writeValueAsString(reader.location("213.199.154.23")));
+		System.out.println(new ObjectMapper().writeValueAsString(reader.location("201.250.60.126")));
 		
 		reader.stop();
 	}

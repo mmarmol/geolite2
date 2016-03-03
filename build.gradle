@@ -33,6 +33,9 @@ dependencies {
     compile 'org.slf4j:slf4j-api:1.7.16'
     compile 'org.slf4j:slf4j-log4j12:1.7.16'
     compile 'com.google.guava:guava:19.0'
+    compile 'org.apache.commons:commons-lang3:3.4'
+    compile 'com.univocity:univocity-parsers:2.0.0'
+    compile 'com.github.davidmoten:rtree:0.7.6'
     testCompile 'junit:junit:4.12' 
 }
 
