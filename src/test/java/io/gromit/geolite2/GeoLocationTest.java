@@ -10,7 +10,7 @@ import org.junit.Test;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.maxmind.geoip2.exception.GeoIp2Exception;
 
-public class ScheduledDatabaseReaderTest {
+public class GeoLocationTest {
 
 	@Test
 	public void testStartStop() throws UnknownHostException, IOException, GeoIp2Exception {

@@ -4,6 +4,8 @@ import static org.junit.Assert.*;
 
 import org.junit.Test;
 
+import io.gromit.geolite2.model.City;
+
 public class CityFinderTest {
 
 	private CityFinder instance = new CityFinder().readCities();

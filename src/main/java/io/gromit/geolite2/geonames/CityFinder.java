@@ -1,9 +1,7 @@
 package io.gromit.geolite2.geonames;
 
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.math.BigInteger;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.HashMap;
@@ -11,7 +9,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.zip.ZipEntry;
-import java.util.zip.ZipException;
 import java.util.zip.ZipInputStream;
 
 import org.slf4j.Logger;
@@ -25,6 +22,7 @@ import com.univocity.parsers.csv.CsvFormat;
 import com.univocity.parsers.csv.CsvParser;
 import com.univocity.parsers.csv.CsvParserSettings;
 
+import io.gromit.geolite2.model.City;
 import rx.Observable;
 
 /**
@@ -88,7 +86,7 @@ public class CityFinder {
 	public CityFinder readCities(){
 		ZipInputStream zipis;
 		CsvParserSettings settings = new CsvParserSettings();
-		settings.selectIndexes(0,1,4,5,8,14,17);
+		settings.selectIndexes(0,2,4,5,8,10,11,14,17);
 		settings.setSkipEmptyLines(true);
 		settings.trimValues(true);
 		CsvFormat format = new CsvFormat();
@@ -108,7 +106,6 @@ public class CityFinder {
 				return this;
 			}
 			RTree<City,Geometry> rtreeRead = RTree.create();
-			Map<Integer, City> geonameMapRead = new HashMap<>();
 			List<String[]> lines = parser.parseAll(new InputStreamReader(zipis, "UTF-8"));
 			for(String[] entry : lines){
 				City city = new City();
@@ -121,25 +118,19 @@ public class CityFinder {
 						rtreeRead = rtreeRead.add(city, Geometries.pointGeographic(city.getLongitude(), city.getLatitude()));
 					}catch(NumberFormatException | NullPointerException e){}
 					city.setCountryIsoCode(entry[4]);
+					city.setSubdivisionOne(entry[5]);
+					city.setSubdivisionTwo(entry[6]);
 					try{
-						city.setPopulation(new BigInteger(entry[5]));
+						city.setPopulation(new BigInteger(entry[7]));
 					}catch(NumberFormatException | NullPointerException e){}
-					city.setTimeZone(entry[6]);
+					city.setTimeZone(entry[8]);
 				}catch(ArrayIndexOutOfBoundsException e){}
-				geonameMapRead.put(city.getGeonameId(), city);	
+				geonameMap.put(city.getGeonameId(), city);	
 			}
 			this.rtree = rtreeRead;
-			this.geonameMap = geonameMapRead;
 			logger.info("loaded "+geonameMap.size()+" cities");
-		} catch (MalformedURLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (ZipException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		} catch (Exception e) {
+			logger.error(e.getMessage(),e);
 		}
 		return this;
 	}

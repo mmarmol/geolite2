@@ -19,8 +19,11 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.URL;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.Executors;
@@ -38,7 +41,16 @@ import com.maxmind.db.Reader.FileMode;
 import com.maxmind.geoip2.DatabaseReader;
 import com.maxmind.geoip2.model.CityResponse;
 
-import io.gromit.geolite2.model.Location;
+import io.gromit.geolite2.geonames.CityFinder;
+import io.gromit.geolite2.geonames.ContinentFinder;
+import io.gromit.geolite2.geonames.CountryFinder;
+import io.gromit.geolite2.geonames.SubdivisionFinder;
+import io.gromit.geolite2.geonames.TimeZoneFinder;
+import io.gromit.geolite2.model.City;
+import io.gromit.geolite2.model.Continent;
+import io.gromit.geolite2.model.Country;
+import io.gromit.geolite2.model.Subdivision;
+import io.gromit.geolite2.model.TimeZone;
 
 /**
  * The Class ScheduledDatabaseReader.
@@ -62,12 +74,24 @@ public class GeoLocation {
 
 	/** The database url. */
 	private String databaseUrl = "http://geolite.maxmind.com/download/geoip/database/GeoLite2-City.mmdb.gz";
-
-	/** The locales. */
-	private List<String> locales = Collections.singletonList("en");
 	
 	/** The cache. */
 	private NodeCache cache = NoCache.getInstance();
+	
+	/** The city finder. */
+	private CityFinder cityFinder = new CityFinder();
+	
+	/** The continent finder. */
+	private ContinentFinder continentFinder = new ContinentFinder();
+	
+	/** The country finder. */
+	private CountryFinder countryFinder = new CountryFinder();
+	
+	/** The subdivision finder. */
+	private SubdivisionFinder subdivisionFinder = new SubdivisionFinder();
+	
+	/** The time zone finder. */
+	private TimeZoneFinder timeZoneFinder = new TimeZoneFinder();
 
 	/**
 	 * Instantiates a new scheduled database reader.
@@ -100,29 +124,23 @@ public class GeoLocation {
 	}
 
 	/**
-	 * Locales.
-	 *
-	 * @param val the val
-	 * @return the scheduled database reader
-	 */
-	public GeoLocation locales(List<String> val) {
-		this.locales = val;
-		return this;
-	}
-
-	/**
 	 * Cache.
 	 *
 	 * @param cache the cache
-	 * @return the scheduled database reader
+	 * @return the scheduled database readers
 	 */
 	public GeoLocation cache(NodeCache cache) {
 		this.cache = cache;
 		return this;
 	}
 
-
-	public Location location(String ip){
+	/**
+	 * Location.
+	 *
+	 * @param ip the ip
+	 * @return the map
+	 */
+	public Map<String, Object> location(String ip){
 		CityResponse cityResponse;
 		try {
 			cityResponse = this.databaseReader.city(InetAddress.getByName(ip));
@@ -134,33 +152,110 @@ public class GeoLocation {
 		if(cityResponse==null){
 			return null;
 		}
-		Location location = new Location();
-		if(cityResponse.getCity()!=null){
-			location.setCityName(cityResponse.getCity().getName());
-			location.setCityGeonameId(cityResponse.getCity().getGeoNameId());
+		City city = null;
+		Country country = null;
+		Continent continent = null;
+		Subdivision one = null;
+		Subdivision two = null;
+		Map<String, Object> data = new LinkedHashMap<>();
+		Map<String, Object> location = new LinkedHashMap<>();
+		data.put("ip", ip);
+		if(cityResponse.getLocation()!=null){
+			data.put("latitude",cityResponse.getLocation().getLatitude());
+			data.put("longitude",cityResponse.getLocation().getLongitude());
 		}
-		if(cityResponse.getContinent()!=null){
-			location.setContinentCode(cityResponse.getContinent().getCode());
-			location.setContinentName(cityResponse.getContinent().getName());
-			location.setContinentGeonameId(cityResponse.getContinent().getGeoNameId());
+		if(cityResponse.getCity()!=null){
+			location.put("name", cityResponse.getCity().getName());
+			location.put("geoNameId", cityResponse.getCity().getGeoNameId());
+			city = this.cityFinder.find(cityResponse.getCity().getGeoNameId());
+		}if(cityResponse.getLocation()!=null){
+			city = this.cityFinder.find(cityResponse.getLocation().getLongitude(), cityResponse.getLocation().getLatitude());
+		}
+		//if city does not match country, remove it
+		if(city!=null && cityResponse.getCountry()!=null 
+				&& !cityResponse.getCountry().getIsoCode().equals(city.getCountryIsoCode())){
+			city=null;
 		}
 		if(cityResponse.getCountry()!=null){
-			location.setCountryIsoCode(cityResponse.getCountry().getIsoCode());
-			location.setCountryName(cityResponse.getCountry().getName());
-			location.setCountryGeonameId(cityResponse.getCountry().getGeoNameId());
+			country=countryFinder.find(cityResponse.getCountry().getGeoNameId());
 		}
-		if(cityResponse.getLocation()!=null){
-			location.setLatitude(cityResponse.getLocation().getLatitude());
-			location.setLongitude(cityResponse.getLocation().getLongitude());
+		if(country==null && city!=null){
+			country=countryFinder.find(city.getCountryIsoCode());
 		}
-		if(cityResponse.getSubdivisions()!=null 
+		if(continent==null && cityResponse.getContinent()!=null){
+			continent=continentFinder.find(cityResponse.getContinent().getCode());
+		}
+		if(continent==null && country!=null){
+			continent=continentFinder.find(country.getContinent());
+		}
+		if(city!=null){
+			location.put("geoNameId", city.getGeonameId());
+			location.put("name", city.getName());
+			location.put("population", city.getPopulation());
+			TimeZone timeZone = timeZoneFinder.find(city.getTimeZone());
+			if(timeZone!=null){
+				data.put("timeZone", timeZone);
+			}
+			one = subdivisionFinder.find(city.getCountryIsoCode(), city.getSubdivisionOne());
+			two = subdivisionFinder.find(city.getCountryIsoCode(), city.getSubdivisionOne(), city.getSubdivisionTwo());
+		}else if(cityResponse.getSubdivisions()!=null 
 				&& cityResponse.getSubdivisions().size()>0){
-			location.setSubdivisionIsoCode(cityResponse.getSubdivisions().get(0).getIsoCode());
-			location.setSubdivisionName(cityResponse.getSubdivisions().get(0).getName());
-			location.setSubdivisionGeonameId(cityResponse.getSubdivisions().get(0).getGeoNameId());
+			one=subdivisionFinder.find(cityResponse.getSubdivisions().get(0).getGeoNameId());
+			if(cityResponse.getSubdivisions().size()>1){
+				two=subdivisionFinder.find(cityResponse.getSubdivisions().get(1).getGeoNameId());
+			}
 		}
-		
-		return location;
+		List<Map<String, Object>> subdivisions = new ArrayList<>();
+		if(one!=null){
+			Map<String, Object> sub = new LinkedHashMap<>();
+			sub.put("name", one.getName());
+			sub.put("geonNameId", one.getGeonameId());
+			subdivisions.add(sub);
+		}
+		if(two!=null){
+			Map<String, Object> sub = new LinkedHashMap<>();
+			sub.put("name", two.getName());
+			sub.put("geonNameId", two.getGeonameId());
+			subdivisions.add(sub);
+		}
+		if(subdivisions!=null && subdivisions.size()>0){
+			data.put("subdivisions", subdivisions);
+		}
+		Map<String, Object> countryMap = new LinkedHashMap<>();
+		if(country!=null){
+			countryMap.put("area", country.getArea());
+			countryMap.put("capital", country.getCapital());
+			countryMap.put("currencyCode", country.getCurrencyCode());
+			countryMap.put("currencyName", country.getCurrencyName());
+			countryMap.put("language", country.getLanguage());
+			countryMap.put("name", country.getName());
+			countryMap.put("phone", country.getPhone());
+			countryMap.put("population", country.getPopulation());
+			countryMap.put("iso", country.getIso());
+			countryMap.put("geoNameId", country.getGeonameId());
+		}else if(cityResponse.getCountry()!=null){
+			countryMap.put("name", cityResponse.getCountry().getName());
+			countryMap.put("geoNameId", cityResponse.getCountry().getGeoNameId());
+			countryMap.put("iso", cityResponse.getCountry().getIsoCode());
+		}
+		if(countryMap.size()>0){
+			data.put("country", countryMap);
+		}
+		Map<String, Object> continentMap = new LinkedHashMap<>();
+		if(continent!=null){
+			continentMap.put("geoNameId", continent.getGeonameId());
+			continentMap.put("iso", continent.getIso());
+			continentMap.put("name", continent.getName());
+		}else if(cityResponse.getContinent()!=null){
+			continentMap.put("geoNameId", cityResponse.getContinent().getGeoNameId());
+			continentMap.put("iso", cityResponse.getContinent().getCode());
+			continentMap.put("name", cityResponse.getContinent().getName());
+		}
+		if(continentMap.size()>0){
+			data.put("continent", continent);
+		}
+		data.put("city", location);
+		return data;
 	}
 	
 	/**
@@ -219,7 +314,7 @@ public class GeoLocation {
 		if(!onlineMD5Checksum.equals(localMD5Checksum)){
 			try{
 				logger.info("UPDATING local database with online database");
-				DatabaseReader newReader = new DatabaseReader.Builder(new GZIPInputStream(new URL(databaseUrl).openStream())).locales(locales).fileMode(FileMode.MEMORY).withCache(cache).build();
+				DatabaseReader newReader = new DatabaseReader.Builder(new GZIPInputStream(new URL(databaseUrl).openStream())).locales(Collections.singletonList("en")).fileMode(FileMode.MEMORY).withCache(cache).build();
 				if(databaseReader!=null){
 					final DatabaseReader readerToClose = databaseReader;
 					new Timer().schedule(new TimerTask() {				
@@ -242,6 +337,11 @@ public class GeoLocation {
 		}else{
 			logger.info("local and online database are the same");
 		}
+		this.cityFinder.readCities();
+		this.countryFinder.readCountries();
+		this.subdivisionFinder.readLevelOne();
+		this.subdivisionFinder.readLevelTwo();
+		this.timeZoneFinder.readTimeZones();
 	}
 
 }

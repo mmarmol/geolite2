@@ -1,4 +1,4 @@
-package io.gromit.geolite2.geonames;
+package io.gromit.geolite2.model;
 
 import java.math.BigInteger;
 
@@ -24,6 +24,12 @@ public class City {
 	
 	/** The country iso code. */
 	private String countryIsoCode;
+	
+	/** The subdivision one. */
+	private String subdivisionOne;
+	
+	/** The subdivision two. */
+	private String subdivisionTwo;
 	
 	/** The population. */
 	private BigInteger population;
@@ -155,6 +161,42 @@ public class City {
 	 */
 	public void setTimeZone(String timeZone) {
 		this.timeZone = timeZone;
+	}
+	
+	/**
+	 * Gets the subdivision one.
+	 *
+	 * @return the subdivision one
+	 */
+	public String getSubdivisionOne() {
+		return subdivisionOne;
+	}
+
+	/**
+	 * Sets the subdivision one.
+	 *
+	 * @param subdivisionOne the new subdivision one
+	 */
+	public void setSubdivisionOne(String subdivisionOne) {
+		this.subdivisionOne = subdivisionOne;
+	}
+
+	/**
+	 * Gets the subdivision two.
+	 *
+	 * @return the subdivision two
+	 */
+	public String getSubdivisionTwo() {
+		return subdivisionTwo;
+	}
+
+	/**
+	 * Sets the subdivision two.
+	 *
+	 * @param subdivisionTwo the new subdivision two
+	 */
+	public void setSubdivisionTwo(String subdivisionTwo) {
+		this.subdivisionTwo = subdivisionTwo;
 	}
 
 	/*
