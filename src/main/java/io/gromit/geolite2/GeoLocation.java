@@ -100,6 +100,62 @@ public class GeoLocation {
 	}
 
 	/**
+	 * Cities url.
+	 *
+	 * @param citiesUrl the cities url
+	 * @return the geo location
+	 */
+	public GeoLocation citiesUrl(String citiesUrl){
+		this.cityFinder.citiesUrl(citiesUrl);
+		return this;
+	}
+	
+	/**
+	 * Countries url.
+	 *
+	 * @param countriesUrl the countries url
+	 * @return the geo location
+	 */
+	public GeoLocation countriesUrl(String countriesUrl){
+		this.countryFinder.countriesUrl(countriesUrl);
+		return this;
+	}
+	
+	/**
+	 * Time zones url.
+	 *
+	 * @param timeZonesUrl the time zones url
+	 * @return the geo location
+	 */
+	public GeoLocation timeZonesUrl(String timeZonesUrl){
+		this.timeZoneFinder.timeZonesUrl(timeZonesUrl);
+		return this;
+	}
+	
+	/**
+	 * Subdivision one url.
+	 *
+	 * @param subdivisionOneUrl the subdivision one url
+	 * @return the geo location
+	 */
+	public GeoLocation subdivisionOneUrl(String subdivisionOneUrl){
+		this.subdivisionFinder.subdivisionOneUrl(subdivisionOneUrl);
+		return this;
+	}
+	
+	/**
+	 * Subdivision two url.
+	 *
+	 * @param subdivisionTwoUrl the subdivision two url
+	 * @return the geo location
+	 */
+	public GeoLocation subdivisionTwoUrl(String subdivisionTwoUrl){
+		this.subdivisionFinder.subdivisionTwoUrl(subdivisionTwoUrl);
+		return this;
+	}
+	
+	
+	/**
 	 * Md5 checksum url.
 	 *
 	 * @param md5ChecksumUrl

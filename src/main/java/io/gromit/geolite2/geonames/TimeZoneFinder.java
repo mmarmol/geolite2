@@ -52,6 +52,17 @@ public class TimeZoneFinder {
 	private Map<String, TimeZone> idMap = new HashMap<>();
 	
 	/**
+	 * Time zones url.
+	 *
+	 * @param timeZonesUrl the time zones url
+	 * @return the time zone finder
+	 */
+	public TimeZoneFinder timeZonesUrl(String timeZonesUrl){
+		this.timeZonesUrl = timeZonesUrl;
+		return this;
+	}
+	
+	/**
 	 * Find.
 	 *
 	 * @param id the id

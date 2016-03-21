@@ -61,6 +61,17 @@ public class CityFinder {
 	private Map<Integer, City> geonameMap = new HashMap<>();
 	
 	/**
+	 * Cities url.
+	 *
+	 * @param citiesUrl the cities url
+	 * @return the city finder
+	 */
+	public CityFinder citiesUrl(String citiesUrl){
+		this.citiesUrl = citiesUrl;
+		return this;
+	}
+	
+	/**
 	 * Find.
 	 *
 	 * @param geonameId the geoname id
@@ -76,7 +87,7 @@ public class CityFinder {
 	/**
 	 * Find.
 	 *
-	 * @param longitud the longitude
+	 * @param longitude the longitude
 	 * @param latitude the latitude
 	 * @return the city
 	 */
@@ -97,6 +108,8 @@ public class CityFinder {
 	
 	/**
 	 * Read cities.
+	 *
+	 * @return the city finder
 	 */
 	public CityFinder readCities(){
 		ZipInputStream zipis;

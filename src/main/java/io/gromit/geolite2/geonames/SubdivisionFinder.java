@@ -62,7 +62,29 @@ public class SubdivisionFinder {
 	
 	/** The geoname id map. */
 	private Map<Integer, Subdivision> geonameIdMap = new HashMap<>();
-
+	
+	/**
+	 * Subdivision one url.
+	 *
+	 * @param subdivisionOneUrl the subdivision one url
+	 * @return the subdivision finder
+	 */
+	public SubdivisionFinder subdivisionOneUrl(String subdivisionOneUrl){
+		this.subdivisionOneUrl = subdivisionOneUrl;
+		return this;
+	}
+	
+	/**
+	 * Subdivision two url.
+	 *
+	 * @param subdivisionTwoUrl the subdivision two url
+	 * @return the subdivision finder
+	 */
+	public SubdivisionFinder subdivisionTwoUrl(String subdivisionTwoUrl){
+		this.subdivisionTwoUrl = subdivisionTwoUrl;
+		return this;
+	}
+	
 	/**
 	 * Find.
 	 *

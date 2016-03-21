@@ -55,6 +55,17 @@ public class CountryFinder {
 	private Map<String, Country> isoMap = new HashMap<>();
 	
 	/**
+	 * Countries url.
+	 *
+	 * @param countriesUrl the countries url
+	 * @return the country finder
+	 */
+	public CountryFinder countriesUrl(String countriesUrl){
+		this.countriesUrl = countriesUrl;
+		return this;
+	}
+	
+	/**
 	 * Find.
 	 *
 	 * @param geonameId the geoname id
@@ -130,7 +141,7 @@ public class CountryFinder {
 			geonameMap.put(country.getGeonameId(), country);
 			isoMap.put(country.getIso(), country);
 		}
-		logger.info("loaded "+geonameMap.size()+" cities");
+		logger.info("loaded "+geonameMap.size()+" countries");
 		return this;
 	}
 	
