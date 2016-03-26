@@ -25,7 +25,15 @@ repositories {
 }
 
 group = 'io.gromit'
-version = '0.3.0'
+
+jar {
+    baseName = 'geolite2'
+    version =  '0.3.1'
+    from('repos') {
+        include 'pom.xml'
+        into('META-INF/maven/io.gromit/geolite2')
+    }
+}
 
 dependencies {
     compile 'commons-io:commons-io:2.4'
