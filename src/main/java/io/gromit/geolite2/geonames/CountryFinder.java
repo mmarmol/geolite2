@@ -32,6 +32,7 @@ import com.univocity.parsers.csv.CsvFormat;
 import com.univocity.parsers.csv.CsvParser;
 import com.univocity.parsers.csv.CsvParserSettings;
 
+import io.gromit.geolite2.LoaderListener;
 import io.gromit.geolite2.model.Country;
 
 /**
@@ -42,6 +43,9 @@ public class CountryFinder {
 	/** The logger. */
 	private static Logger logger = LoggerFactory.getLogger(CountryFinder.class);
 
+	/** The Constant COUNTRY_FAIL_SAFE_URL. */
+	public static final String COUNTRY_FAIL_SAFE_URL = "io.gromit.geolite2.country.fail.safe.url";
+	
 	/** The countries url. */
 	private String countriesUrl = "http://download.geonames.org/export/dump/countryInfo.txt";
 
@@ -53,6 +57,20 @@ public class CountryFinder {
 	
 	/** The iso map. */
 	private Map<String, Country> isoMap = new HashMap<>();
+	
+	/** The loader listener. */
+	private LoaderListener loaderListener = LoaderListener.DEFAULT;
+	
+	/**
+	 * Loader listener.
+	 *
+	 * @param loaderListener the loader listener
+	 * @return the country finder
+	 */
+	public CountryFinder loaderListener(LoaderListener loaderListener){
+		this.loaderListener = loaderListener;
+		return this;
+	}
 	
 	/**
 	 * Countries url.
@@ -97,10 +115,30 @@ public class CountryFinder {
 	 * @return the country finder
 	 */
 	public CountryFinder readCountries(){
+		try{
+			readCountries(countriesUrl);
+			loaderListener.success(countriesUrl);
+		}catch(Exception e){
+			loaderListener.failure(countriesUrl, e);
+			logger.error("error loading from remote",e);
+			if(StringUtils.isNotBlank(System.getProperty(COUNTRY_FAIL_SAFE_URL))){
+				readCountries(System.getProperty(COUNTRY_FAIL_SAFE_URL));
+			}
+		}
+		return this;
+	}
+	
+	/**
+	 * Read countries.
+	 *
+	 * @param countriesLocationUrl the countries location url
+	 * @return the country finder
+	 */
+	private CountryFinder readCountries(String countriesLocationUrl){
 		byte[] bytes = null;
 		String newMD5 = null;
 		try {
-			bytes = IOUtils.toByteArray(new URL(countriesUrl).openStream());
+			bytes = IOUtils.toByteArray(new URL(countriesLocationUrl).openStream());
 			newMD5 = new String(MessageDigest.getInstance("MD5").digest(bytes));
 		} catch (Exception e) {
 			throw new RuntimeException(e);

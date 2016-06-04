@@ -32,6 +32,7 @@ import com.univocity.parsers.csv.CsvFormat;
 import com.univocity.parsers.csv.CsvParser;
 import com.univocity.parsers.csv.CsvParserSettings;
 
+import io.gromit.geolite2.LoaderListener;
 import io.gromit.geolite2.model.TimeZone;
 
 /**
@@ -42,6 +43,9 @@ public class TimeZoneFinder {
 	/** The logger. */
 	private static Logger logger = LoggerFactory.getLogger(TimeZoneFinder.class);
 	
+	/** The Constant TIMEZONES_FAIL_SAFE_URL. */
+	public static final String TIMEZONES_FAIL_SAFE_URL = "io.gromit.geolite2.timezones.fail.safe.url";
+	
 	/** The countries url. */
 	private String timeZonesUrl = "http://download.geonames.org/export/dump/timeZones.txt";
 
@@ -50,6 +54,20 @@ public class TimeZoneFinder {
 	
 	/** The id map. */
 	private Map<String, TimeZone> idMap = new HashMap<>();
+	
+	/** The loader listener. */
+	private LoaderListener loaderListener = LoaderListener.DEFAULT;
+	
+	/**
+	 * Loader listener.
+	 *
+	 * @param loaderListener the loader listener
+	 * @return the time zone finder
+	 */
+	public TimeZoneFinder loaderListener(LoaderListener loaderListener){
+		this.loaderListener = loaderListener;
+		return this;
+	}
 	
 	/**
 	 * Time zones url.
@@ -81,10 +99,30 @@ public class TimeZoneFinder {
 	 * @return the time zone finder
 	 */
 	public TimeZoneFinder readTimeZones(){
+		try{
+			readTimeZones(timeZonesUrl);
+			loaderListener.success(timeZonesUrl);
+		}catch(Exception e){
+			loaderListener.failure(timeZonesUrl, e);
+			logger.error("error loading from remote",e);
+			if(StringUtils.isNotBlank(System.getProperty(TIMEZONES_FAIL_SAFE_URL))){
+				readTimeZones(System.getProperty(TIMEZONES_FAIL_SAFE_URL));
+			}
+		}
+		return this;
+	}
+	
+	/**
+	 * Read time zones.
+	 *
+	 * @param timeZonesLocationUrl the time zones location url
+	 * @return the time zone finder
+	 */
+	private TimeZoneFinder readTimeZones(String timeZonesLocationUrl){
 		byte[] bytes = null;
 		String newMD5 = null;
 		try {
-			bytes = IOUtils.toByteArray(new URL(timeZonesUrl).openStream());
+			bytes = IOUtils.toByteArray(new URL(timeZonesLocationUrl).openStream());
 			newMD5 = new String(MessageDigest.getInstance("MD5").digest(bytes));
 		} catch (Exception e) {
 			throw new RuntimeException(e);

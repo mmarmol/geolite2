@@ -32,6 +32,7 @@ import com.univocity.parsers.csv.CsvFormat;
 import com.univocity.parsers.csv.CsvParser;
 import com.univocity.parsers.csv.CsvParserSettings;
 
+import io.gromit.geolite2.LoaderListener;
 import io.gromit.geolite2.model.Subdivision;
 
 /**
@@ -41,6 +42,12 @@ public class SubdivisionFinder {
 
 	/** The logger. */
 	private static Logger logger = LoggerFactory.getLogger(SubdivisionFinder.class);
+
+	/** The Constant ADMIN1_FAIL_SAFE_URL. */
+	public static final String ADMIN1_FAIL_SAFE_URL = "io.gromit.geolite2.admin1.fail.safe.url";
+
+	/** The Constant ADMIN2_FAIL_SAFE_URL. */
+	public static final String ADMIN2_FAIL_SAFE_URL = "io.gromit.geolite2.admin2.fail.safe.url";
 
 	/** The subdivision one url. */
 	private String subdivisionOneUrl = "http://download.geonames.org/export/dump/admin1CodesASCII.txt";
@@ -62,6 +69,20 @@ public class SubdivisionFinder {
 	
 	/** The geoname id map. */
 	private Map<Integer, Subdivision> geonameIdMap = new HashMap<>();
+	
+	/** The loader listener. */
+	private LoaderListener loaderListener = LoaderListener.DEFAULT;
+	
+	/**
+	 * Loader listener.
+	 *
+	 * @param loaderListener the loader listener
+	 * @return the subdivision finder
+	 */
+	public SubdivisionFinder loaderListener(LoaderListener loaderListener){
+		this.loaderListener = loaderListener;
+		return this;
+	}
 	
 	/**
 	 * Subdivision one url.
@@ -128,15 +149,35 @@ public class SubdivisionFinder {
 	}
 	
 	/**
-	 * Read countries.
+	 * Read level one.
 	 *
-	 * @return the time zone finder
+	 * @return the subdivision finder
 	 */
 	public SubdivisionFinder readLevelOne() {
+		try{
+			readLevelOne(subdivisionOneUrl);
+			loaderListener.success(subdivisionOneUrl);
+		}catch(Exception e){
+			loaderListener.failure(subdivisionOneUrl, e);
+			logger.error("error loading from remote",e);
+			if(StringUtils.isNotBlank(System.getProperty(ADMIN1_FAIL_SAFE_URL))){
+				readLevelOne(System.getProperty(ADMIN1_FAIL_SAFE_URL));
+			}
+		}
+		return this;
+	}
+	
+	/**
+	 * Read countries.
+	 *
+	 * @param subdivisionOneLocationUrl the subdivision one location url
+	 * @return the time zone finder
+	 */
+	public SubdivisionFinder readLevelOne(String subdivisionOneLocationUrl) {
 		byte[] bytes = null;
 		String newMD5 = null;
 		try {
-			bytes = IOUtils.toByteArray(new URL(subdivisionOneUrl).openStream());
+			bytes = IOUtils.toByteArray(new URL(subdivisionOneLocationUrl).openStream());
 			newMD5 = new String(MessageDigest.getInstance("MD5").digest(bytes));
 		} catch (Exception e) {
 			throw new RuntimeException(e);
@@ -173,11 +214,31 @@ public class SubdivisionFinder {
 	}
 	
 	/**
-	 * Read level two.
+	 * Read level one.
 	 *
 	 * @return the subdivision finder
 	 */
 	public SubdivisionFinder readLevelTwo() {
+		try{
+			readLevelTwo(subdivisionTwoUrl);
+			loaderListener.success(subdivisionTwoUrl);
+		}catch(Exception e){
+			loaderListener.failure(subdivisionTwoUrl, e);
+			logger.error("error loading from remote",e);
+			if(StringUtils.isNotBlank(System.getProperty(ADMIN2_FAIL_SAFE_URL))){
+				readLevelTwo(System.getProperty(ADMIN2_FAIL_SAFE_URL));
+			}
+		}
+		return this;
+	}
+	
+	/**
+	 * Read level two.
+	 *
+	 * @param subdivisionTwoLocationUrl the subdivision two location url
+	 * @return the subdivision finder
+	 */
+	public SubdivisionFinder readLevelTwo(String subdivisionTwoLocationUrl) {
 		byte[] bytes = null;
 		String newMD5 = null;
 		try {

@@ -28,7 +28,7 @@ group = 'io.gromit'
 
 jar {
     baseName = 'geolite2'
-    version =  '0.3.1'
+    version =  '0.4.0'
     from('repos') {
         include 'pom.xml'
         into('META-INF/maven/io.gromit/geolite2')

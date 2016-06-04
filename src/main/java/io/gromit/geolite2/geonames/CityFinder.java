@@ -26,6 +26,7 @@ import java.util.NoSuchElementException;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,6 +38,7 @@ import com.univocity.parsers.csv.CsvFormat;
 import com.univocity.parsers.csv.CsvParser;
 import com.univocity.parsers.csv.CsvParserSettings;
 
+import io.gromit.geolite2.LoaderListener;
 import io.gromit.geolite2.model.City;
 import rx.Observable;
 
@@ -47,6 +49,9 @@ public class CityFinder {
 
 	/** The logger. */
 	private static Logger logger = LoggerFactory.getLogger(CityFinder.class);
+	
+	/** The Constant CITY_FAIL_SAFE_URL. */
+	public static final String CITY_FAIL_SAFE_URL = "io.gromit.geolite2.city.fail.safe.url";
 	
 	/** The cities url. */
 	private String citiesUrl = "http://download.geonames.org/export/dump/cities15000.zip";
@@ -59,6 +64,20 @@ public class CityFinder {
 	
 	/** The geoname map. */
 	private Map<Integer, City> geonameMap = new HashMap<>();
+	
+	/** The loader listener. */
+	private LoaderListener loaderListener = LoaderListener.DEFAULT;
+	
+	/**
+	 * Loader listener.
+	 *
+	 * @param loaderListener the loader listener
+	 * @return the city finder
+	 */
+	public CityFinder loaderListener(LoaderListener loaderListener){
+		this.loaderListener = loaderListener;
+		return this;
+	}
 	
 	/**
 	 * Cities url.
@@ -112,6 +131,26 @@ public class CityFinder {
 	 * @return the city finder
 	 */
 	public CityFinder readCities(){
+		try{
+			readCities(citiesUrl);
+			loaderListener.success(citiesUrl);
+		}catch(Exception e){
+			loaderListener.failure(citiesUrl, e);
+			logger.error("error loading from remote",e);
+			if(StringUtils.isNotBlank(System.getProperty(CITY_FAIL_SAFE_URL))){
+				readCities(System.getProperty(CITY_FAIL_SAFE_URL));
+			}
+		}
+		return this;
+	}
+	
+	/**
+	 * Read cities.
+	 *
+	 * @param citiesLocationUrl the cities location url
+	 * @return the city finder
+	 */
+	private CityFinder readCities(String citiesLocationUrl){
 		ZipInputStream zipis;
 		CsvParserSettings settings = new CsvParserSettings();
 		settings.selectIndexes(0,2,4,5,8,10,11,14,17);
@@ -126,7 +165,7 @@ public class CityFinder {
 		settings.setFormat(format);
 		CsvParser parser = new CsvParser(settings);
 		try {
-			zipis = new ZipInputStream(new URL(citiesUrl).openStream(), Charset.forName("UTF-8"));
+			zipis = new ZipInputStream(new URL(citiesLocationUrl).openStream(), Charset.forName("UTF-8"));
 			ZipEntry zipEntry = zipis.getNextEntry();
 			logger.info("reading "+zipEntry.getName());
 			if(crc==zipEntry.getCrc()){

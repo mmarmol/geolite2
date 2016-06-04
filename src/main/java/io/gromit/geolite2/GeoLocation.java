@@ -32,6 +32,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.zip.GZIPInputStream;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -60,6 +61,9 @@ public class GeoLocation {
 	/** The logger. */
 	private static Logger logger = LoggerFactory.getLogger(GeoLocation.class);
 
+	/** The Constant GEOLITE_FAIL_SAFE_URL. */
+	public static final String GEOLITE_FAIL_SAFE_URL = "io.gromit.geolite2.fail.safe.url";
+	
 	/** The scheduled executor service. */
 	private ScheduledExecutorService scheduledExecutorService;
 
@@ -92,6 +96,9 @@ public class GeoLocation {
 	
 	/** The time zone finder. */
 	private TimeZoneFinder timeZoneFinder = new TimeZoneFinder();
+	
+	/** The loader listener. */
+	private LoaderListener loaderListener = LoaderListener.DEFAULT;
 
 	/**
 	 * Instantiates a new scheduled database reader.
@@ -187,6 +194,21 @@ public class GeoLocation {
 	 */
 	public GeoLocation cache(NodeCache cache) {
 		this.cache = cache;
+		return this;
+	}
+	
+	/**
+	 * Loader listener.
+	 *
+	 * @param loaderListener the loader listener
+	 * @return the geo location
+	 */
+	public GeoLocation loaderListener(LoaderListener loaderListener){
+		this.loaderListener = loaderListener;
+		this.cityFinder.loaderListener(loaderListener);
+		this.countryFinder.loaderListener(loaderListener);
+		this.subdivisionFinder.loaderListener(loaderListener);
+		this.timeZoneFinder.loaderListener(loaderListener);
 		return this;
 	}
 
@@ -360,6 +382,24 @@ public class GeoLocation {
 	 * Read database.
 	 */
 	public void readDatabase() {
+		try{
+			readDatabase(databaseUrl);
+			loaderListener.success(databaseUrl);
+		}catch(Exception e){
+			loaderListener.failure(databaseUrl, e);
+			logger.error("error loading from remote",e);
+			if(StringUtils.isNotBlank(System.getProperty(GEOLITE_FAIL_SAFE_URL))){
+				readDatabase(System.getProperty(GEOLITE_FAIL_SAFE_URL));
+			}
+		}
+	}
+	
+	/**
+	 * Read database.
+	 *
+	 * @param databaseLocationUrl the database location url
+	 */
+	private void readDatabase(String databaseLocationUrl){
 		String onlineMD5Checksum = null;
 		try{
 			onlineMD5Checksum = IOUtils.toString(new URL(md5ChecksumUrl).openStream()).trim();
@@ -370,7 +410,7 @@ public class GeoLocation {
 		if(!onlineMD5Checksum.equals(localMD5Checksum)){
 			try{
 				logger.info("UPDATING local database with online database");
-				DatabaseReader newReader = new DatabaseReader.Builder(new GZIPInputStream(new URL(databaseUrl).openStream())).locales(Collections.singletonList("en")).fileMode(FileMode.MEMORY).withCache(cache).build();
+				DatabaseReader newReader = new DatabaseReader.Builder(new GZIPInputStream(new URL(databaseLocationUrl).openStream())).locales(Collections.singletonList("en")).fileMode(FileMode.MEMORY).withCache(cache).build();
 				if(databaseReader!=null){
 					final DatabaseReader readerToClose = databaseReader;
 					new Timer().schedule(new TimerTask() {				

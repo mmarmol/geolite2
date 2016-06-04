@@ -7,6 +7,8 @@ Just a couple of useful classes over http://dev.maxmind.com/geoip/geoip2/geolite
   - gets timezones from geonames
   - gets country information from geonames
   - gets continents from geonames
+  - Success and Failure listeners for loading databases
+  - Failsafe urls for databases by properties
 
 Usage
 ----
@@ -84,7 +86,7 @@ For Maven
     <dependency>
     	<groupId>io.gromit</groupId>
     	<artifactId>geolite2</artifactId>
-    	<version>0.3.0</version>
+    	<version>0.4.0</version>
     </dependency>
 
 For Gradle
@@ -94,7 +96,7 @@ For Gradle
     }
     
     dependencies {
-    	compile 'io.gromit:geolite2:0.3.0'
+    	compile 'io.gromit:geolite2:0.4.0'
     }
     
 
