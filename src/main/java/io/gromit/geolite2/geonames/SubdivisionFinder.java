@@ -50,13 +50,13 @@ public class SubdivisionFinder {
 	public static final String ADMIN2_FAIL_SAFE_URL = "io.gromit.geolite2.admin2.fail.safe.url";
 
 	/** The subdivision one url. */
-	private String subdivisionOneUrl = "http://download.geonames.org/export/dump/admin1CodesASCII.txt";
+	private String subdivisionOneUrl = "https://raw.githubusercontent.com/mmarmol/geonames/master/data/admin1CodesASCII.txt";
 
 	/** The subdivision one m d5. */
 	private String subdivisionOneMD5 = null;
 
 	/** The subdivision two url. */
-	private String subdivisionTwoUrl = "http://download.geonames.org/export/dump/admin2Codes.txt";
+	private String subdivisionTwoUrl = "https://raw.githubusercontent.com/mmarmol/geonames/master/data/admin2Codes.txt";
 
 	/** The subdivision two m d5. */
 	private String subdivisionTwoMD5 = null;

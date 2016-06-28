@@ -212,6 +212,72 @@ public class GeoLocation {
 		return this;
 	}
 
+	public Map<String, Object> location(Double latitude, Double longitude){
+		City city = null;
+		Country country = null;
+		Continent continent = null;
+		Subdivision one = null;
+		Subdivision two = null;
+		Map<String, Object> data = new LinkedHashMap<>();
+		Map<String, Object> location = new LinkedHashMap<>();
+		data.put("latitude", latitude);
+		data.put("longitude", longitude);
+		city = this.cityFinder.find(longitude, latitude);
+		if(city!=null){
+			location.put("geoNameId", city.getGeonameId());
+			location.put("name", city.getName());
+			location.put("population", city.getPopulation());
+			TimeZone timeZone = timeZoneFinder.find(city.getTimeZone());
+			if(timeZone!=null){
+				data.put("timeZone", timeZone);
+			}
+			one = subdivisionFinder.find(city.getCountryIsoCode(), city.getSubdivisionOne());
+			two = subdivisionFinder.find(city.getCountryIsoCode(), city.getSubdivisionOne(), city.getSubdivisionTwo());
+			country=countryFinder.find(city.getCountryIsoCode());
+			List<Map<String, Object>> subdivisions = new ArrayList<>();
+			if(two!=null){
+				Map<String, Object> sub = new LinkedHashMap<>();
+				sub.put("name", two.getName());
+				sub.put("geonNameId", two.getGeonameId());
+				subdivisions.add(sub);
+			}
+			if(one!=null){
+				Map<String, Object> sub = new LinkedHashMap<>();
+				sub.put("name", one.getName());
+				sub.put("geonNameId", one.getGeonameId());
+				subdivisions.add(sub);
+			}
+			if(subdivisions!=null && subdivisions.size()>0){
+				data.put("subdivisions", subdivisions);
+			}
+			Map<String, Object> countryMap = new LinkedHashMap<>();
+			if(country!=null){
+				countryMap.put("area", country.getArea());
+				countryMap.put("capital", country.getCapital());
+				countryMap.put("currencyCode", country.getCurrencyCode());
+				countryMap.put("currencyName", country.getCurrencyName());
+				countryMap.put("language", country.getLanguage());
+				countryMap.put("name", country.getName());
+				countryMap.put("phone", country.getPhone());
+				countryMap.put("population", country.getPopulation());
+				countryMap.put("iso", country.getIso());
+				countryMap.put("geoNameId", country.getGeonameId());
+				data.put("country", countryMap);
+				continent = continentFinder.find(country.getContinent());
+				if(continent!=null){
+					Map<String, Object> continentMap = new LinkedHashMap<>();
+					continentMap.put("geoNameId", continent.getGeonameId());
+					continentMap.put("iso", continent.getIso());
+					continentMap.put("name", continent.getName());
+					data.put("continent", continent);
+				}
+			}
+			data.put("city", location);	
+		}
+		return data;
+	}
+	
+	
 	/**
 	 * Location.
 	 *
@@ -246,7 +312,8 @@ public class GeoLocation {
 			location.put("name", cityResponse.getCity().getName());
 			location.put("geoNameId", cityResponse.getCity().getGeoNameId());
 			city = this.cityFinder.find(cityResponse.getCity().getGeoNameId());
-		}if(cityResponse.getLocation()!=null){
+		}
+		if(city==null && cityResponse.getLocation()!=null){
 			city = this.cityFinder.find(cityResponse.getLocation().getLongitude(), cityResponse.getLocation().getLatitude());
 		}
 		//if city does not match country, remove it
@@ -284,16 +351,16 @@ public class GeoLocation {
 			}
 		}
 		List<Map<String, Object>> subdivisions = new ArrayList<>();
-		if(one!=null){
-			Map<String, Object> sub = new LinkedHashMap<>();
-			sub.put("name", one.getName());
-			sub.put("geonNameId", one.getGeonameId());
-			subdivisions.add(sub);
-		}
 		if(two!=null){
 			Map<String, Object> sub = new LinkedHashMap<>();
 			sub.put("name", two.getName());
 			sub.put("geonNameId", two.getGeonameId());
+			subdivisions.add(sub);
+		}
+		if(one!=null){
+			Map<String, Object> sub = new LinkedHashMap<>();
+			sub.put("name", one.getName());
+			sub.put("geonNameId", one.getGeonameId());
 			subdivisions.add(sub);
 		}
 		if(subdivisions!=null && subdivisions.size()>0){

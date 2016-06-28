@@ -47,7 +47,7 @@ public class CountryFinder {
 	public static final String COUNTRY_FAIL_SAFE_URL = "io.gromit.geolite2.country.fail.safe.url";
 	
 	/** The countries url. */
-	private String countriesUrl = "http://download.geonames.org/export/dump/countryInfo.txt";
+	private String countriesUrl = "https://raw.githubusercontent.com/mmarmol/geonames/master/data/countryInfo.txt";
 
 	/** The country m d5. */
 	private String countryMD5 = null;

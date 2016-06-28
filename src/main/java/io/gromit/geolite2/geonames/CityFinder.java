@@ -54,7 +54,7 @@ public class CityFinder {
 	public static final String CITY_FAIL_SAFE_URL = "io.gromit.geolite2.city.fail.safe.url";
 	
 	/** The cities url. */
-	private String citiesUrl = "http://download.geonames.org/export/dump/cities15000.zip";
+	private String citiesUrl = "https://raw.githubusercontent.com/mmarmol/geonames/master/data/cities1000.zip";
 	
 	/** The crc. */
 	private Long crc = -2l;

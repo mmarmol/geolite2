@@ -1,5 +1,5 @@
 # geolite2
-Just a couple of useful classes over http://dev.maxmind.com/geoip/geoip2/geolite2/ and geonames org
+Just a couple of useful classes over http://dev.maxmind.com/geoip/geoip2/geolite2/ and geonames.org but recently we added the dataset from https://github.com/mmarmol/geonames since genonames.org decided to make private the datasets.
   - It has a class to automatically re-load the database from a url and store it on memory.
   - The database will be re-loaded one time by day if a different MD5 checksum found on destination, if not will keep the existen one.
   - It adds a Guava Cache implementation for the database so it can replace the HashMap based offered by default by geolite2.
@@ -9,6 +9,7 @@ Just a couple of useful classes over http://dev.maxmind.com/geoip/geoip2/geolite
   - gets continents from geonames
   - Success and Failure listeners for loading databases
   - Failsafe urls for databases by properties
+  - we search also locations based on latitude and longitude from the closer location on geonames dataset
 
 Usage
 ----
@@ -86,7 +87,7 @@ For Maven
     <dependency>
     	<groupId>io.gromit</groupId>
     	<artifactId>geolite2</artifactId>
-    	<version>0.4.0</version>
+    	<version>0.5.0</version>
     </dependency>
 
 For Gradle
@@ -96,7 +97,7 @@ For Gradle
     }
     
     dependencies {
-    	compile 'io.gromit:geolite2:0.4.0'
+    	compile 'io.gromit:geolite2:0.5.0'
     }
     
 

@@ -36,8 +36,8 @@ public class GeoLocationTest {
 			fail();
 		}catch(IllegalStateException e){	
 		}
-		System.out.println(new ObjectMapper().writeValueAsString(reader.location("201.250.60.126")));
-		
+		System.out.println(new ObjectMapper().writeValueAsString(reader.location("179.215.124.14")));
+		System.out.println(new ObjectMapper().writeValueAsString(reader.location(-23.95,-46.3333)));
 		reader.stop();
 	}
 

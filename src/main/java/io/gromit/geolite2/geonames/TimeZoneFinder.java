@@ -47,7 +47,7 @@ public class TimeZoneFinder {
 	public static final String TIMEZONES_FAIL_SAFE_URL = "io.gromit.geolite2.timezones.fail.safe.url";
 	
 	/** The countries url. */
-	private String timeZonesUrl = "http://download.geonames.org/export/dump/timeZones.txt";
+	private String timeZonesUrl = "https://raw.githubusercontent.com/mmarmol/geonames/master/data/timeZones.txt";
 
 	/** The time zones m d5. */
 	private String timeZonesMD5 = null;
