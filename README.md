@@ -33,7 +33,7 @@ To stop the scheduling process:
 To start using it:
 
     reader.databaseReader().location("201.250.60.126");
-    
+    reader.databaseReader().location(-34.6033,-58.3817);
 	{
 		"ip": "201.250.60.126",
 		"latitude": -34.6033,
