@@ -15,14 +15,15 @@
  */
 package io.gromit.geolite2.geonames;
 
-import java.io.ByteArrayInputStream;
+import java.io.InputStreamReader;
 import java.net.URL;
-import java.security.MessageDigest;
+import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.slf4j.Logger;
@@ -47,10 +48,10 @@ public class CountryFinder {
 	public static final String COUNTRY_FAIL_SAFE_URL = "io.gromit.geolite2.country.fail.safe.url";
 	
 	/** The countries url. */
-	private String countriesUrl = "https://raw.githubusercontent.com/mmarmol/geonames/master/data/countryInfo.txt";
+	private String countriesUrl = "https://raw.githubusercontent.com/mmarmol/geonames/master/export/countries.zip";
 
-	/** The country m d5. */
-	private String countryMD5 = null;
+	/** The crc. */
+	private Long crc = -2l;
 	
 	/** The geoname map. */
 	private Map<Integer, Country> geonameMap = new HashMap<>();
@@ -135,49 +136,48 @@ public class CountryFinder {
 	 * @return the country finder
 	 */
 	private CountryFinder readCountries(String countriesLocationUrl){
-		byte[] bytes = null;
-		String newMD5 = null;
+		ZipInputStream zipis = null;
 		try {
-			bytes = IOUtils.toByteArray(new URL(countriesLocationUrl).openStream());
-			newMD5 = new String(MessageDigest.getInstance("MD5").digest(bytes));
+			zipis = new ZipInputStream(new URL(countriesLocationUrl).openStream(), Charset.forName("UTF-8"));
+			ZipEntry zipEntry = zipis.getNextEntry();
+			logger.info("reading "+zipEntry.getName());
+			if(crc==zipEntry.getCrc()){
+				logger.info("skipp, same CRC");
+				return this;
+			}
+		
+			CsvParserSettings settings = new CsvParserSettings();
+			settings.setSkipEmptyLines(true);
+			settings.trimValues(true);
+			CsvFormat format = new CsvFormat();
+			format.setDelimiter('\t');
+			format.setLineSeparator("\n");
+			format.setCharToEscapeQuoteEscaping('\0');
+			format.setQuote('\0');
+			settings.setFormat(format);
+			CsvParser parser = new CsvParser(settings);
+			
+			List<String[]> lines = parser.parseAll(new InputStreamReader(zipis, "UTF-8"));
+			
+			for(String[] entry : lines){
+				Country country = new Country();
+				country.setIso(entry[0]);
+				country.setIso3(entry[1]);
+				country.setName(entry[2]);
+				country.setCapital(entry[3]);
+				country.setContinent(entry[4]);
+				country.setCurrencyCode(entry[5]);
+				country.setCurrencyName(entry[6]);
+				country.setPhone(entry[7]);
+				country.setLanguage(StringUtils.substringBefore(entry[8], ","));
+				country.setGeonameId(NumberUtils.toInt(entry[9]));
+				geonameMap.put(country.getGeonameId(), country);
+				isoMap.put(country.getIso(), country);
+			}
 		} catch (Exception e) {
 			throw new RuntimeException(e);
-		}
-		if(newMD5.equals(countryMD5)){
-			logger.info("same MD5 content for both files, do not load it");
-			return this;
-		}
-		countryMD5 = newMD5;
-		CsvParserSettings settings = new CsvParserSettings();
-		settings.selectIndexes(0,1,4,5,6,7,8,10,11,12,15,16);
-		settings.setSkipEmptyLines(true);
-		settings.trimValues(true);
-		CsvFormat format = new CsvFormat();
-		format.setDelimiter('\t');
-		format.setLineSeparator("\n");
-		format.setCharToEscapeQuoteEscaping('\0');
-		format.setQuote('\0');
-		settings.setFormat(format);
-		CsvParser parser = new CsvParser(settings);
-		
-		List<String[]> lines = parser.parseAll(new ByteArrayInputStream(bytes), "UTF-8");
-		
-		for(String[] entry : lines){
-			Country country = new Country();
-			country.setIso(entry[0]);
-			country.setIso3(entry[1]);
-			country.setName(entry[2]);
-			country.setCapital(entry[3]);
-			country.setArea(NumberUtils.toLong(entry[4]));
-			country.setPopulation(NumberUtils.toLong(entry[5]));
-			country.setContinent(entry[6]);
-			country.setCurrencyCode(entry[7]);
-			country.setCurrencyName(entry[8]);
-			country.setPhone(entry[9]);
-			country.setLanguage(StringUtils.substringBefore(entry[10], ","));
-			country.setGeonameId(NumberUtils.toInt(entry[11]));
-			geonameMap.put(country.getGeonameId(), country);
-			isoMap.put(country.getIso(), country);
+		} finally {
+			try{zipis.close();}catch(Exception e){};
 		}
 		logger.info("loaded "+geonameMap.size()+" countries");
 		return this;

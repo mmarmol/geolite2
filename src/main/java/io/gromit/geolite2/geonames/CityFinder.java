@@ -16,7 +16,6 @@
 package io.gromit.geolite2.geonames;
 
 import java.io.InputStreamReader;
-import java.math.BigInteger;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.HashMap;
@@ -54,7 +53,7 @@ public class CityFinder {
 	public static final String CITY_FAIL_SAFE_URL = "io.gromit.geolite2.city.fail.safe.url";
 	
 	/** The cities url. */
-	private String citiesUrl = "https://raw.githubusercontent.com/mmarmol/geonames/master/data/cities1000.zip";
+	private String citiesUrl = "https://raw.githubusercontent.com/mmarmol/geonames/master/export/cities.zip";
 	
 	/** The crc. */
 	private Long crc = -2l;
@@ -151,9 +150,8 @@ public class CityFinder {
 	 * @return the city finder
 	 */
 	private CityFinder readCities(String citiesLocationUrl){
-		ZipInputStream zipis;
+		ZipInputStream zipis = null;
 		CsvParserSettings settings = new CsvParserSettings();
-		settings.selectIndexes(0,2,4,5,8,10,11,14,17);
 		settings.setSkipEmptyLines(true);
 		settings.trimValues(true);
 		CsvFormat format = new CsvFormat();
@@ -187,10 +185,7 @@ public class CityFinder {
 					city.setCountryIsoCode(entry[4]);
 					city.setSubdivisionOne(entry[5]);
 					city.setSubdivisionTwo(entry[6]);
-					try{
-						city.setPopulation(new BigInteger(entry[7]));
-					}catch(NumberFormatException | NullPointerException e){}
-					city.setTimeZone(entry[8]);
+					city.setTimeZone(entry[7]);
 				}catch(ArrayIndexOutOfBoundsException e){}
 				geonameMap.put(city.getGeonameId(), city);	
 			}
@@ -198,6 +193,8 @@ public class CityFinder {
 			logger.info("loaded "+geonameMap.size()+" cities");
 		} catch (Exception e) {
 			logger.error(e.getMessage(),e);
+		}finally {
+			try{zipis.close();}catch(Exception e){};
 		}
 		return this;
 	}

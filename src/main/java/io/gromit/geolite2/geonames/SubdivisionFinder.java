@@ -15,14 +15,15 @@
  */
 package io.gromit.geolite2.geonames;
 
-import java.io.ByteArrayInputStream;
+import java.io.InputStreamReader;
 import java.net.URL;
-import java.security.MessageDigest;
+import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.slf4j.Logger;
@@ -50,16 +51,16 @@ public class SubdivisionFinder {
 	public static final String ADMIN2_FAIL_SAFE_URL = "io.gromit.geolite2.admin2.fail.safe.url";
 
 	/** The subdivision one url. */
-	private String subdivisionOneUrl = "https://raw.githubusercontent.com/mmarmol/geonames/master/data/admin1CodesASCII.txt";
+	private String subdivisionOneUrl = "https://raw.githubusercontent.com/mmarmol/geonames/master/export/subdivisions1.zip";
 
 	/** The subdivision one m d5. */
-	private String subdivisionOneMD5 = null;
+	private Long crc1 = -2l;
 
 	/** The subdivision two url. */
-	private String subdivisionTwoUrl = "https://raw.githubusercontent.com/mmarmol/geonames/master/data/admin2Codes.txt";
+	private String subdivisionTwoUrl = "https://raw.githubusercontent.com/mmarmol/geonames/master/export/subdivisions2.zip";
 
 	/** The subdivision two m d5. */
-	private String subdivisionTwoMD5 = null;
+	private Long crc2 = -2l;
 
 	/** The id one map. */
 	private Map<String, Subdivision> idOneMap = new HashMap<>();
@@ -174,42 +175,42 @@ public class SubdivisionFinder {
 	 * @return the time zone finder
 	 */
 	public SubdivisionFinder readLevelOne(String subdivisionOneLocationUrl) {
-		byte[] bytes = null;
-		String newMD5 = null;
+		ZipInputStream zipis = null;
 		try {
-			bytes = IOUtils.toByteArray(new URL(subdivisionOneLocationUrl).openStream());
-			newMD5 = new String(MessageDigest.getInstance("MD5").digest(bytes));
+			zipis = new ZipInputStream(new URL(subdivisionOneLocationUrl).openStream(), Charset.forName("UTF-8"));
+			ZipEntry zipEntry = zipis.getNextEntry();
+			logger.info("reading "+zipEntry.getName());
+			if(crc1==zipEntry.getCrc()){
+				logger.info("skipp, same CRC");
+				return this;
+			}
+			CsvParserSettings settings = new CsvParserSettings();
+			settings.setSkipEmptyLines(true);
+			settings.trimValues(true);
+			CsvFormat format = new CsvFormat();
+			format.setDelimiter('\t');
+			format.setLineSeparator("\n");
+			format.setCharToEscapeQuoteEscaping('\0');
+			format.setQuote('\0');
+			settings.setFormat(format);
+			CsvParser parser = new CsvParser(settings);
+	
+			List<String[]> lines = parser.parseAll(new InputStreamReader(zipis, "UTF-8"));
+	
+			for (String[] entry : lines) {
+				Subdivision subdivision = new Subdivision();
+				subdivision.setId(entry[0]);
+				subdivision.setName(entry[1]);
+				subdivision.setGeonameId(NumberUtils.toInt(entry[2]));
+				idOneMap.put(subdivision.getId(), subdivision);
+				geonameIdMap.put(subdivision.getGeonameId(), subdivision);
+			}
+			logger.info("loaded " + lines.size() + " subdivisions level 1");
 		} catch (Exception e) {
-			throw new RuntimeException(e);
+			logger.error(e.getMessage(),e);
+		}finally {
+			try{zipis.close();}catch(Exception e){};
 		}
-		if (newMD5.equals(subdivisionOneMD5)) {
-			logger.info("same MD5 content for both files, do not load it");
-			return this;
-		}
-		subdivisionOneMD5 = newMD5;
-		CsvParserSettings settings = new CsvParserSettings();
-		settings.setSkipEmptyLines(true);
-		settings.selectIndexes(0,2,3);
-		settings.trimValues(true);
-		CsvFormat format = new CsvFormat();
-		format.setDelimiter('\t');
-		format.setLineSeparator("\n");
-		format.setCharToEscapeQuoteEscaping('\0');
-		format.setQuote('\0');
-		settings.setFormat(format);
-		CsvParser parser = new CsvParser(settings);
-
-		List<String[]> lines = parser.parseAll(new ByteArrayInputStream(bytes), "UTF-8");
-
-		for (String[] entry : lines) {
-			Subdivision subdivision = new Subdivision();
-			subdivision.setId(entry[0]);
-			subdivision.setName(entry[1]);
-			subdivision.setGeonameId(NumberUtils.toInt(entry[2]));
-			idOneMap.put(subdivision.getId(), subdivision);
-			geonameIdMap.put(subdivision.getGeonameId(), subdivision);
-		}
-		logger.info("loaded " + lines.size() + " subdivisions level 1");
 		return this;
 	}
 	
@@ -239,40 +240,42 @@ public class SubdivisionFinder {
 	 * @return the subdivision finder
 	 */
 	public SubdivisionFinder readLevelTwo(String subdivisionTwoLocationUrl) {
-		byte[] bytes = null;
-		String newMD5 = null;
+		ZipInputStream zipis = null;
 		try {
-			bytes = IOUtils.toByteArray(new URL(subdivisionTwoUrl).openStream());
-			newMD5 = new String(MessageDigest.getInstance("MD5").digest(bytes));
+			zipis = new ZipInputStream(new URL(subdivisionTwoLocationUrl).openStream(), Charset.forName("UTF-8"));
+			ZipEntry zipEntry = zipis.getNextEntry();
+			logger.info("reading "+zipEntry.getName());
+			if(crc2==zipEntry.getCrc()){
+				logger.info("skipp, same CRC");
+				return this;
+			}
+			CsvParserSettings settings = new CsvParserSettings();
+			settings.setSkipEmptyLines(true);
+			settings.trimValues(true);
+			CsvFormat format = new CsvFormat();
+			format.setDelimiter('\t');
+			format.setLineSeparator("\n");
+			format.setCharToEscapeQuoteEscaping('\0');
+			format.setQuote('\0');
+			settings.setFormat(format);
+			CsvParser parser = new CsvParser(settings);
+	
+			List<String[]> lines = parser.parseAll(new InputStreamReader(zipis, "UTF-8"));
+			
+			for (String[] entry : lines) {
+				Subdivision subdivision = new Subdivision();
+				subdivision.setId(entry[0]);
+				subdivision.setName(entry[1]);
+				subdivision.setGeonameId(NumberUtils.toInt(entry[2]));
+				idTowMap.put(subdivision.getId(), subdivision);
+				geonameIdMap.put(subdivision.getGeonameId(), subdivision);
+			}
+			logger.info("loaded " + lines.size() + " subdivisions level 2");
 		} catch (Exception e) {
-			throw new RuntimeException(e);
+			logger.error(e.getMessage(),e);
+		}finally {
+			try{zipis.close();}catch(Exception e){};
 		}
-		if (newMD5.equals(subdivisionTwoMD5)) {
-			logger.info("same MD5 content for both files, do not load it");
-			return this;
-		}
-		subdivisionTwoMD5 = newMD5;
-		CsvParserSettings settings = new CsvParserSettings();
-		settings.setSkipEmptyLines(true);
-		settings.selectIndexes(0,2,3);
-		settings.trimValues(true);
-		CsvFormat format = new CsvFormat();
-		format.setDelimiter('\t');
-		format.setLineSeparator("\n");
-		format.setCharToEscapeQuoteEscaping('\0');
-		format.setQuote('\0');
-		settings.setFormat(format);
-		CsvParser parser = new CsvParser(settings);
-		List<String[]> lines = parser.parseAll(new ByteArrayInputStream(bytes), "UTF-8");
-		for (String[] entry : lines) {
-			Subdivision subdivision = new Subdivision();
-			subdivision.setId(entry[0]);
-			subdivision.setName(entry[1]);
-			subdivision.setGeonameId(NumberUtils.toInt(entry[2]));
-			idTowMap.put(subdivision.getId(), subdivision);
-			geonameIdMap.put(subdivision.getGeonameId(), subdivision);
-		}
-		logger.info("loaded " + lines.size() + " subdivisions level 2");
 		return this;
 	}
 }

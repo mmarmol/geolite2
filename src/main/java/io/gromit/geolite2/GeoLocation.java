@@ -220,13 +220,11 @@ public class GeoLocation {
 		Subdivision one = null;
 		Subdivision two = null;
 		Map<String, Object> data = new LinkedHashMap<>();
-		Map<String, Object> location = new LinkedHashMap<>();
 		data.put("latitude", latitude);
 		data.put("longitude", longitude);
 		city = this.cityFinder.find(longitude, latitude);
 		if(city!=null){
-			location.put("name", city.getName());
-			location.put("population", city.getPopulation());
+			data.put("cityName", city.getName());
 			TimeZone timeZone = timeZoneFinder.find(city.getTimeZone());
 			if(timeZone!=null){
 				HashMap<String, Object> timeZoneMap = new HashMap<>();
@@ -251,25 +249,20 @@ public class GeoLocation {
 			}
 			Map<String, Object> countryMap = new LinkedHashMap<>();
 			if(country!=null){
-				countryMap.put("area", country.getArea());
 				countryMap.put("capital", country.getCapital());
 				countryMap.put("currencyCode", country.getCurrencyCode());
 				countryMap.put("currencyName", country.getCurrencyName());
 				countryMap.put("language", country.getLanguage());
 				countryMap.put("name", country.getName());
 				countryMap.put("phone", country.getPhone());
-				countryMap.put("population", country.getPopulation());
 				countryMap.put("iso", country.getIso());
 				data.put("country", countryMap);
 				continent = continentFinder.find(country.getContinent());
 				if(continent!=null){
-					Map<String, Object> continentMap = new LinkedHashMap<>();
-					continentMap.put("iso", continent.getIso());
-					continentMap.put("name", continent.getName());
-					data.put("continent", continent);
+					data.put("continentIso", continent.getIso());
+					data.put("continentName", continent.getName());
 				}
 			}
-			data.put("city", location);	
 		}
 		return data;
 	}
@@ -299,15 +292,13 @@ public class GeoLocation {
 		Subdivision one = null;
 		Subdivision two = null;
 		Map<String, Object> data = new LinkedHashMap<>();
-		Map<String, Object> location = new LinkedHashMap<>();
 		data.put("ip", ip);
 		if(cityResponse.getLocation()!=null){
 			data.put("latitude",cityResponse.getLocation().getLatitude());
 			data.put("longitude",cityResponse.getLocation().getLongitude());
 		}
 		if(cityResponse.getCity()!=null){
-			location.put("name", cityResponse.getCity().getName());
-			location.put("geoNameId", cityResponse.getCity().getGeoNameId());
+			data.put("cityName", cityResponse.getCity().getName());
 			city = this.cityFinder.find(cityResponse.getCity().getGeoNameId());
 		}
 		if(city==null && cityResponse.getLocation()!=null){
@@ -331,8 +322,7 @@ public class GeoLocation {
 			continent=continentFinder.find(country.getContinent());
 		}
 		if(city!=null){
-			location.put("name", city.getName());
-			location.put("population", city.getPopulation());
+			data.put("cityName", city.getName());
 			TimeZone timeZone = timeZoneFinder.find(city.getTimeZone());
 			if(timeZone!=null){
 				HashMap<String, Object> timeZoneMap = new HashMap<>();
@@ -363,14 +353,12 @@ public class GeoLocation {
 		}
 		Map<String, Object> countryMap = new LinkedHashMap<>();
 		if(country!=null){
-			countryMap.put("area", country.getArea());
 			countryMap.put("capital", country.getCapital());
 			countryMap.put("currencyCode", country.getCurrencyCode());
 			countryMap.put("currencyName", country.getCurrencyName());
 			countryMap.put("language", country.getLanguage());
 			countryMap.put("name", country.getName());
 			countryMap.put("phone", country.getPhone());
-			countryMap.put("population", country.getPopulation());
 			countryMap.put("iso", country.getIso());
 		}else if(cityResponse.getCountry()!=null){
 			countryMap.put("name", cityResponse.getCountry().getName());
@@ -381,16 +369,15 @@ public class GeoLocation {
 		}
 		Map<String, Object> continentMap = new LinkedHashMap<>();
 		if(continent!=null){
-			continentMap.put("iso", continent.getIso());
-			continentMap.put("name", continent.getName());
+			continentMap.put("continentIso", continent.getIso());
+			continentMap.put("continentName", continent.getName());
 		}else if(cityResponse.getContinent()!=null){
-			continentMap.put("iso", cityResponse.getContinent().getCode());
-			continentMap.put("name", cityResponse.getContinent().getName());
+			continentMap.put("continentIso", cityResponse.getContinent().getCode());
+			continentMap.put("continentName", cityResponse.getContinent().getName());
 		}
 		if(continentMap.size()>0){
-			data.put("continent", continent);
+			data.putAll(continentMap);
 		}
-		data.put("city", location);
 		return data;
 	}
 	

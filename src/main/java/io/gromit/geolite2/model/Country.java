@@ -38,12 +38,6 @@ public class Country {
 	/** The capital. */
 	private String capital;
 	
-	/** The area. */
-	private Long area;
-	
-	/** The population. */
-	private Long population;
-	
 	/** The continent. */
 	private String continent;
 	
@@ -147,42 +141,6 @@ public class Country {
 	 */
 	public void setCapital(String capital) {
 		this.capital = capital;
-	}
-
-	/**
-	 * Gets the area.
-	 *
-	 * @return the area
-	 */
-	public Long getArea() {
-		return area;
-	}
-
-	/**
-	 * Sets the area.
-	 *
-	 * @param area the new area
-	 */
-	public void setArea(Long area) {
-		this.area = area;
-	}
-
-	/**
-	 * Gets the population.
-	 *
-	 * @return the population
-	 */
-	public Long getPopulation() {
-		return population;
-	}
-
-	/**
-	 * Sets the population.
-	 *
-	 * @param population the new population
-	 */
-	public void setPopulation(Long population) {
-		this.population = population;
 	}
 
 	/**

@@ -15,8 +15,6 @@
  */
 package io.gromit.geolite2.model;
 
-import java.math.BigInteger;
-
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
@@ -45,9 +43,6 @@ public class City {
 	
 	/** The subdivision two. */
 	private String subdivisionTwo;
-	
-	/** The population. */
-	private BigInteger population;
 	
 	/** The time zone. */
 	private String timeZone;
@@ -140,24 +135,6 @@ public class City {
 	 */
 	public void setCountryIsoCode(String countryIsoCode) {
 		this.countryIsoCode = countryIsoCode;
-	}
-
-	/**
-	 * Gets the population.
-	 *
-	 * @return the population
-	 */
-	public BigInteger getPopulation() {
-		return population;
-	}
-	
-	/**
-	 * Sets the population.
-	 *
-	 * @param population the new population
-	 */
-	public void setPopulation(BigInteger population) {
-		this.population = population;
 	}
 	
 	/**
