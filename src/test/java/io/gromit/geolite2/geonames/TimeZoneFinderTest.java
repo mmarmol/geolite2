@@ -19,11 +19,15 @@ import static org.junit.Assert.*;
 
 import org.junit.Test;
 
+import io.gromit.geolite2.model.TimeZone;
+
 public class TimeZoneFinderTest {
 
 	@Test
 	public void testFind() {
-		assertNotNull(new TimeZoneFinder().readTimeZones().find("America/Argentina/Buenos_Aires"));
+		TimeZone timeZone = new TimeZoneFinder().readTimeZones().find("America/Argentina/Buenos_Aires");
+		assertNotNull(timeZone);
+		System.out.print(timeZone);
 	}
 
 }

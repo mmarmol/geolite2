@@ -27,17 +27,23 @@ public class TimeZone {
 	private String countryIso;
 	
 	/** The id. */
-	private String id;
+	private Integer id;
 	
-	/** The jan offset. */
-	private Float janOffset;
+	/** The name. */
+	private String name;
 	
-	/** The jul offset. */
-	private Float julOffset;
+	/** The dtsoffset. */
+	private Integer dtsOffset;
 	
-	/** The raw offset. */
-	private Float rawOffset;
-
+	/** The utc offset. */
+	private Integer utcOffset;
+	
+	/** The current offset. */
+	private Integer currentOffset;
+	
+	/** The changed at. */
+	private Long changedAt;
+	
 	/**
 	 * Gets the country iso.
 	 *
@@ -61,7 +67,7 @@ public class TimeZone {
 	 *
 	 * @return the id
 	 */
-	public String getId() {
+	public Integer getId() {
 		return id;
 	}
 
@@ -70,64 +76,100 @@ public class TimeZone {
 	 *
 	 * @param id the new id
 	 */
-	public void setId(String id) {
+	public void setId(Integer id) {
 		this.id = id;
 	}
 
 	/**
-	 * Gets the jan offset.
+	 * Gets the dts offset.
 	 *
-	 * @return the jan offset
+	 * @return the dts offset
 	 */
-	public Float getJanOffset() {
-		return janOffset;
+	public Integer getDtsOffset() {
+		return dtsOffset;
 	}
 
 	/**
-	 * Sets the jan offset.
+	 * Sets the dts offset.
 	 *
-	 * @param janOffset the new jan offset
+	 * @param dtsOffset the new dts offset
 	 */
-	public void setJanOffset(Float janOffset) {
-		this.janOffset = janOffset;
+	public void setDtsOffset(Integer dtsOffset) {
+		this.dtsOffset = dtsOffset;
 	}
 
 	/**
-	 * Gets the jul offset.
+	 * Gets the utc offset.
 	 *
-	 * @return the jul offset
+	 * @return the utc offset
 	 */
-	public Float getJulOffset() {
-		return julOffset;
+	public Integer getUtcOffset() {
+		return utcOffset;
 	}
 
 	/**
-	 * Sets the jul offset.
+	 * Sets the utc offset.
 	 *
-	 * @param julOffset the new jul offset
+	 * @param utcOffset the new utc offset
 	 */
-	public void setJulOffset(Float julOffset) {
-		this.julOffset = julOffset;
+	public void setUtcOffset(Integer utcOffset) {
+		this.utcOffset = utcOffset;
 	}
 
 	/**
-	 * Gets the raw offset.
+	 * Gets the current offset.
 	 *
-	 * @return the raw offset
+	 * @return the current offset
 	 */
-	public Float getRawOffset() {
-		return rawOffset;
+	public Integer getCurrentOffset() {
+		return currentOffset;
 	}
 
 	/**
-	 * Sets the raw offset.
+	 * Sets the current offset.
 	 *
-	 * @param rawOffset the new raw offset
+	 * @param currentOffset the new current offset
 	 */
-	public void setRawOffset(Float rawOffset) {
-		this.rawOffset = rawOffset;
+	public void setCurrentOffset(Integer currentOffset) {
+		this.currentOffset = currentOffset;
 	}
-	
+
+	/**
+	 * Gets the changed at.
+	 *
+	 * @return the changed at
+	 */
+	public Long getChangedAt() {
+		return changedAt;
+	}
+
+	/**
+	 * Sets the changed at.
+	 *
+	 * @param nextOffset the new changed at
+	 */
+	public void setChangedAt(Long nextOffset) {
+		this.changedAt = nextOffset;
+	}
+
+	/**
+	 * Gets the name.
+	 *
+	 * @return the name
+	 */
+	public String getName() {
+		return name;
+	}
+
+	/**
+	 * Sets the name.
+	 *
+	 * @param name the new name
+	 */
+	public void setName(String name) {
+		this.name = name;
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * 

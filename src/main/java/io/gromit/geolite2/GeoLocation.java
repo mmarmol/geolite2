@@ -228,10 +228,11 @@ public class GeoLocation {
 			TimeZone timeZone = timeZoneFinder.find(city.getTimeZone());
 			if(timeZone!=null){
 				HashMap<String, Object> timeZoneMap = new HashMap<>();
-				timeZoneMap.put("id", timeZone.getId());
-				timeZoneMap.put("janOffset", timeZone.getJanOffset());
-				timeZoneMap.put("julOffset", timeZone.getJulOffset());
-				timeZoneMap.put("rawOffset", timeZone.getRawOffset());
+				timeZoneMap.put("name", timeZone.getName());
+				timeZoneMap.put("dtsOffset", timeZone.getDtsOffset());
+				timeZoneMap.put("utcOffset", timeZone.getUtcOffset());
+				timeZoneMap.put("currentOffset", timeZone.getCurrentOffset());
+				timeZoneMap.put("changedAt", timeZone.getChangedAt());
 				data.put("timeZone", timeZoneMap);
 			}
 			one = subdivisionFinder.find(city.getCountryIsoCode(), city.getSubdivisionOne());
@@ -326,10 +327,11 @@ public class GeoLocation {
 			TimeZone timeZone = timeZoneFinder.find(city.getTimeZone());
 			if(timeZone!=null){
 				HashMap<String, Object> timeZoneMap = new HashMap<>();
-				timeZoneMap.put("id", timeZone.getId());
-				timeZoneMap.put("janOffset", timeZone.getJanOffset());
-				timeZoneMap.put("julOffset", timeZone.getJulOffset());
-				timeZoneMap.put("rawOffset", timeZone.getRawOffset());
+				timeZoneMap.put("name", timeZone.getName());
+				timeZoneMap.put("dtsOffset", timeZone.getDtsOffset());
+				timeZoneMap.put("utcOffset", timeZone.getUtcOffset());
+				timeZoneMap.put("currentOffset", timeZone.getCurrentOffset());
+				timeZoneMap.put("changedAt", timeZone.getChangedAt());
 				data.put("timeZone", timeZoneMap);
 			}
 			one = subdivisionFinder.find(city.getCountryIsoCode(), city.getSubdivisionOne());
