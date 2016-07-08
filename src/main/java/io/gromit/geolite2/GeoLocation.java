@@ -260,8 +260,10 @@ public class GeoLocation {
 				data.put("country", countryMap);
 				continent = continentFinder.find(country.getContinent());
 				if(continent!=null){
-					data.put("continentIso", continent.getIso());
-					data.put("continentName", continent.getName());
+					HashMap<String, Object> continentMap = new HashMap<>();
+					continentMap.put("iso", continent.getIso());
+					continentMap.put("name", continent.getName());
+					data.put("continent", continentMap);
 				}
 			}
 		}
@@ -371,14 +373,14 @@ public class GeoLocation {
 		}
 		Map<String, Object> continentMap = new LinkedHashMap<>();
 		if(continent!=null){
-			continentMap.put("continentIso", continent.getIso());
-			continentMap.put("continentName", continent.getName());
+			continentMap.put("iso", continent.getIso());
+			continentMap.put("name", continent.getName());
 		}else if(cityResponse.getContinent()!=null){
-			continentMap.put("continentIso", cityResponse.getContinent().getCode());
-			continentMap.put("continentName", cityResponse.getContinent().getName());
+			continentMap.put("iso", cityResponse.getContinent().getCode());
+			continentMap.put("name", cityResponse.getContinent().getName());
 		}
 		if(continentMap.size()>0){
-			data.putAll(continentMap);
+			data.put("continent",continentMap);
 		}
 		return data;
 	}

@@ -52,6 +52,8 @@ public class TimeZoneFinder {
 	
 	private static final String ZONE_FILE_NAME = "zone.csv";
 	
+	private static final Double OFFSET_UNIT = (60d*60d);
+	
 	/** The Constant TIMEZONES_FAIL_SAFE_URL. */
 	public static final String TIMEZONES_FAIL_SAFE_URL = "io.gromit.geolite2.timezones.fail.safe.url";
 	
@@ -110,17 +112,17 @@ public class TimeZoneFinder {
 		if(other==null){
 			other = offsetMap.get(timeZone.getId()).lower(new Offset(ceiling.getTimeStart()));
 		}
-		timeZone.setCurrentOffset(ceiling.getGmtOffset());
+		timeZone.setCurrentOffset(ceiling.getGmtOffset()/OFFSET_UNIT);
 		timeZone.setChangedAt(ceiling.getTimeStart());
 		if(ceiling.getDst()){
-			timeZone.setDtsOffset(ceiling.getGmtOffset());
+			timeZone.setDtsOffset(ceiling.getGmtOffset()/OFFSET_UNIT);
 			if(other!=null){
-				timeZone.setUtcOffset(other.getGmtOffset());
+				timeZone.setUtcOffset(other.getGmtOffset()/OFFSET_UNIT);
 			}
 		}else{
-			timeZone.setDtsOffset(other.getGmtOffset());
+			timeZone.setDtsOffset(other.getGmtOffset()/OFFSET_UNIT);
 			if(other!=null){
-				timeZone.setUtcOffset(ceiling.getGmtOffset());
+				timeZone.setUtcOffset(ceiling.getGmtOffset()/OFFSET_UNIT);
 			}
 		}
 		return timeZone;

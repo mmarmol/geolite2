@@ -40,10 +40,10 @@ To start using it:
 		"longitude": -46.3333,
 		"cityName": "Santos",
 		"timeZone": {
-			"utcOffset": -10800,
-			"currentOffset": -10800,
+			"utcOffset": -3.0,
+			"currentOffset": -3.0,
 			"name": "America/Sao_Paulo",
-			"dtsOffset": -7200,
+			"dtsOffset": -2.0,
 			"changedAt": 1456020000
 		},
 		"subdivisions": ["Santos", "Sao Paulo"],
@@ -56,8 +56,10 @@ To start using it:
 			"phone": "55",
 			"iso": "BR"
 		},
-		"continentIso": "SA",
-		"continentName": "South America"
+		"continent": {
+			"continentIso": "SA",
+			"continentName": "South America"
+		}
 	}
     
 Maven Repo

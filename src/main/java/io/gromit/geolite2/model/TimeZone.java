@@ -33,13 +33,13 @@ public class TimeZone {
 	private String name;
 	
 	/** The dtsoffset. */
-	private Integer dtsOffset;
+	private Double dtsOffset;
 	
 	/** The utc offset. */
-	private Integer utcOffset;
+	private Double utcOffset;
 	
 	/** The current offset. */
-	private Integer currentOffset;
+	private Double currentOffset;
 	
 	/** The changed at. */
 	private Long changedAt;
@@ -85,7 +85,7 @@ public class TimeZone {
 	 *
 	 * @return the dts offset
 	 */
-	public Integer getDtsOffset() {
+	public Double getDtsOffset() {
 		return dtsOffset;
 	}
 
@@ -94,7 +94,7 @@ public class TimeZone {
 	 *
 	 * @param dtsOffset the new dts offset
 	 */
-	public void setDtsOffset(Integer dtsOffset) {
+	public void setDtsOffset(Double dtsOffset) {
 		this.dtsOffset = dtsOffset;
 	}
 
@@ -103,7 +103,7 @@ public class TimeZone {
 	 *
 	 * @return the utc offset
 	 */
-	public Integer getUtcOffset() {
+	public Double getUtcOffset() {
 		return utcOffset;
 	}
 
@@ -112,7 +112,7 @@ public class TimeZone {
 	 *
 	 * @param utcOffset the new utc offset
 	 */
-	public void setUtcOffset(Integer utcOffset) {
+	public void setUtcOffset(Double utcOffset) {
 		this.utcOffset = utcOffset;
 	}
 
@@ -121,7 +121,7 @@ public class TimeZone {
 	 *
 	 * @return the current offset
 	 */
-	public Integer getCurrentOffset() {
+	public Double getCurrentOffset() {
 		return currentOffset;
 	}
 
@@ -130,7 +130,7 @@ public class TimeZone {
 	 *
 	 * @param currentOffset the new current offset
 	 */
-	public void setCurrentOffset(Integer currentOffset) {
+	public void setCurrentOffset(Double currentOffset) {
 		this.currentOffset = currentOffset;
 	}
 
