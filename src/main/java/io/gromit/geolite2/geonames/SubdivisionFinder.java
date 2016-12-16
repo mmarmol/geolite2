@@ -177,6 +177,7 @@ public class SubdivisionFinder {
 	public SubdivisionFinder readLevelOne(String subdivisionOneLocationUrl) {
 		ZipInputStream zipis = null;
 		try {
+			logger.info("READING subdivisions database at url {}", subdivisionOneLocationUrl);
 			zipis = new ZipInputStream(new URL(subdivisionOneLocationUrl).openStream(), Charset.forName("UTF-8"));
 			ZipEntry zipEntry = zipis.getNextEntry();
 			logger.info("reading "+zipEntry.getName());

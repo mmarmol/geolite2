@@ -150,6 +150,7 @@ public class CityFinder {
 	 * @return the city finder
 	 */
 	private CityFinder readCities(String citiesLocationUrl){
+		logger.info("READING cities database at url {}", citiesLocationUrl);
 		ZipInputStream zipis = null;
 		CsvParserSettings settings = new CsvParserSettings();
 		settings.setSkipEmptyLines(true);

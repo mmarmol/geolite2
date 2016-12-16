@@ -450,6 +450,7 @@ public class GeoLocation {
 	 */
 	private void readDatabase(String databaseLocationUrl){
 		String onlineMD5Checksum = null;
+		logger.info("CHEKING geolocation database at url {}", databaseLocationUrl);
 		try{
 			onlineMD5Checksum = IOUtils.toString(new URL(md5ChecksumUrl).openStream()).trim();
 		}catch(Exception e){

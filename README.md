@@ -76,7 +76,7 @@ For Maven
     <dependency>
     	<groupId>io.gromit</groupId>
     	<artifactId>geolite2</artifactId>
-    	<version>0.6.0</version>
+    	<version>0.6.1</version>
     </dependency>
 
 For Gradle
@@ -86,7 +86,7 @@ For Gradle
     }
     
     dependencies {
-    	compile 'io.gromit:geolite2:0.6.0'
+    	compile 'io.gromit:geolite2:0.6.1'
     }
     
 

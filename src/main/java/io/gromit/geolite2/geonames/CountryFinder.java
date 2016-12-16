@@ -138,6 +138,7 @@ public class CountryFinder {
 	private CountryFinder readCountries(String countriesLocationUrl){
 		ZipInputStream zipis = null;
 		try {
+			logger.info("READING countries database at url {}", countriesLocationUrl);
 			zipis = new ZipInputStream(new URL(countriesLocationUrl).openStream(), Charset.forName("UTF-8"));
 			ZipEntry zipEntry = zipis.getNextEntry();
 			logger.info("reading "+zipEntry.getName());

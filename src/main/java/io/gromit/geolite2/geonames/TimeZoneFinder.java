@@ -156,6 +156,7 @@ public class TimeZoneFinder {
 	private TimeZoneFinder readTimeZones(String timeZonesLocationUrl){
 		ClosableZipInputStream zipis = null;
 		try {
+			logger.info("READING timezones database at url {}", timeZonesLocationUrl);
 			zipis = new ClosableZipInputStream(new URL(timeZonesLocationUrl).openStream(), Charset.forName("UTF-8"));
 			ZipEntry zipEntry = null;
 			while((zipEntry=zipis.getNextEntry())!=null){
